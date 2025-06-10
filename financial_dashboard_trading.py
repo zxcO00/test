@@ -43,11 +43,27 @@ def load_data(path):
 
 ###### 選擇金融商品
 st.subheader("選擇金融商品: ")
-# choices = ['台積電: 2022.1.1 至 2024.4.9', '大台指2024.12到期: 2024.1 至 2024.4.9']
-choices = ['台積電: 2022.1.1 至 2024.4.9', '大台指期貨2024.12到期: 2023.12 至 2024.4.11', '小台指期貨2024.12到期: 2023.12 至 2024.4.11', '英業達2020.1.2 至 2024.4.12', '堤維西2020.1.2 至 2024.4.12']
-choice = st.selectbox('選擇金融商品', choices, index=0)
-##### 读取Pickle文件
-if choice == choices[0] :         ##'台積電: 2022.1.1 至 2024.4.9':
+# 
+import os
+
+# 自動從目前目錄讀取所有 kbars_ 開頭的 .pkl 檔案
+data_dir = '.'
+pkl_files = [f for f in os.listdir(data_dir) if f.endswith('.pkl') and f.startswith('kbars_')]
+
+# 轉換檔名為友善顯示
+display_names = [f.replace('kbars_', '').replace('.pkl', '').replace('_', ' ') for f in pkl_files]
+selected_display = st.sidebar.selectbox("請選擇商品", display_names)
+selected_file = pkl_files[display_names.index(selected_display)]
+
+# 載入資料
+@st.cache_data
+def load_data(filename):
+    import pandas as pd
+    df = pd.read_pickle(os.path.join(data_dir, filename))
+    return df
+
+df = load_data(selected_file)
+
     df_original = load_data('kbars_2330_2022-01-01-2024-04-09.pkl')
     product_name = '台積電2330'
     # df_original = load_data('kbars_2330_2022-01-01-2024-04-09.pkl')
